@@ -76,6 +76,47 @@
 
         /* ── Section title ── */
         .section-title { font-size: 1rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        /* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+    .header-banner { padding: 12px 14px; border-radius: 0; }
+    .header-banner h3 { font-size: 1rem; }
+    .header-banner p  { font-size: 0.78rem; }
+    .header-banner .btn { font-size: 0.78rem; padding: 4px 10px; }
+
+    .nav-pills { gap: 4px; }
+    .nav-pills .nav-link {
+        font-size: 0.78rem;
+        padding: 5px 10px;
+        margin-right: 0;
+        white-space: nowrap;
+    }
+    .nav-pills { flex-wrap: nowrap !important; overflow-x: auto; padding-bottom: 4px; }
+
+    .chart-bar-lg  { height: 260px; }
+    .chart-bar-md  { height: 220px; }
+    .doughnut-wrap { height: 180px; }
+
+    .stat-badge .val { font-size: 1.1rem; }
+    .stat-badge      { padding: 8px 10px; }
+
+    table th, table td { font-size: 0.75rem; padding: 4px 5px; }
+
+    .section-title { font-size: 0.88rem; }
+
+    .card-custom { border-radius: 10px; padding: 10px !important; }
+
+    #cancelledBox .d-flex { flex-direction: column; gap: 6px; }
+
+    footer { font-size: 0.78rem; padding: 10px; }
+}
+
+@media (max-width: 480px) {
+    .chart-bar-lg  { height: 200px; }
+    .chart-bar-md  { height: 180px; }
+    .doughnut-wrap { height: 160px; }
+    .nav-pills .nav-link { font-size: 0.72rem; padding: 4px 8px; }
+    table th, table td   { font-size: 0.7rem; }
+}
     </style>
 </head>
 <body>
