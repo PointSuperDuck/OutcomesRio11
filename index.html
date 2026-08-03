@@ -48,6 +48,7 @@
 
         <div class="tab-content">
             
+            <!-- Tab 1 -->
             <div class="tab-pane fade show active" id="tab1">
                 <div class="row">
                     <div class="col-lg-9">
@@ -73,6 +74,7 @@
                 </div>
             </div>
 
+            <!-- Tab 2 -->
             <div class="tab-pane fade" id="tab2">
                 <h5 class="fw-bold mb-3 text-success">🌱 2. ผลการดำเนินงาน กำจัดวัชพืช สชป.11</h5>
                 <div class="row">
@@ -107,6 +109,7 @@
                 </div>
             </div>
 
+            <!-- Tab 3 -->
             <div class="tab-pane fade" id="tab3">
                 <h5 class="fw-bold mb-3 text-warning">🚜 3. ผลการดำเนินงาน ขุดลอกคลอง สชป.11</h5>
                 <div class="row">
@@ -141,6 +144,7 @@
                 </div>
             </div>
 
+            <!-- Tab 4 -->
             <div class="tab-pane fade" id="tab4">
                 <h5 class="fw-bold mb-3" style="color: #6a1b9a;">👷 4. ผลการดำเนินงาน จ้างแรงงาน สชป.11</h5>
                 <div class="info-box mb-3" style="background-color: #f3e5f5; border-color: #8e24aa; color: #4a148c;">
@@ -181,10 +185,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // ⚠️ ใส่ Web App URL ของคุณที่นี่ (ลงท้ายด้วย /exec)
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzR3-OpLxRGQJl_69y_zlcy2DQ-nO8uZt8pz88qVeaWiXuqG6cD0argV-yl3y2UZ8N2ww/exec';
 
-        // 📌 ฟังก์ชันแปลงชื่อหน่วยงานเป็นตัวย่ออัตโนมัติ (แก้ไขจุดที่ 1)
         function getShortAgencyName(fullName) {
             if (!fullName) return 'ไม่ระบุ';
             let name = fullName.trim();
@@ -222,7 +224,7 @@
             return name;
         }
 
-        // ปลั๊กอินเขียนตัวเลขผลต่าง (+/-) บนแท่งกราฟ Tab 1
+        // ปลั๊กอินเขียนตัวเลขผลต่าง (+/-)
         const drawDiffPlugin = {
             id: 'drawDiff',
             afterDatasetsDraw(chart) {
@@ -231,6 +233,12 @@
                 ctx.font = 'bold 11px Sarabun';
                 ctx.textAlign = 'center';
                 
+                // ตรวจสอบว่ากราฟมี 2 datasets หรือไม่ (ป้องกัน Error ในกราฟโดนัท)
+                if (data.datasets.length < 2) {
+                    ctx.restore();
+                    return; 
+                }
+
                 const planMeta = chart.getDatasetMeta(0);
                 const actMeta = chart.getDatasetMeta(1);
 
@@ -251,7 +259,8 @@
                 ctx.restore();
             }
         };
-        Chart.register(drawDiffPlugin);
+
+        // ❌ เอา Chart.register(drawDiffPlugin); ออก เพื่อไม่ให้ไปกระทบกราฟโดนัท
 
         let charts = {};
 
@@ -326,15 +335,16 @@
                     scales: {
                         y: { max: 105, beginAtZero: true },
                         x: { ticks: { font: { family: 'Sarabun', size: 11 } } }
-                    },
-                    plugins: { legend: { position: 'bottom' } }
-                }
+                    }
+                },
+                // ✅ ใส่ Plugin เข้าไปเฉพาะกับกราฟแบบ Bar Chart เท่านั้น
+                plugins: [drawDiffPlugin] 
             });
         }
 
         // ================= TAB 2 (กำจัดวัชพืช) =================
         function processTab2(data) {
-            const weedData = data.filter(d => d.projectName.includes('กำจัดวัชพืช') || d.weedTonsPlan > 0 || d.weedTonsAct > 0 || d.weedRaiPlan > 0 || d.weedRaiAct > 0);
+            const weedData = data.filter(d => (d.projectName && d.projectName.includes('กำจัดวัชพืช')) || d.weedTonsPlan > 0 || d.weedTonsAct > 0 || d.weedRaiPlan > 0 || d.weedRaiAct > 0);
             let summary = {};
             let tPlanTons = 0, tActTons = 0, tPlanRai = 0, tActRai = 0;
 
@@ -355,7 +365,7 @@
 
         // ================= TAB 3 (ขุดลอกคลอง) =================
         function processTab3(data) {
-            const dredgeData = data.filter(d => d.projectName.includes('ขุดลอก') || d.dredgeVolPlan > 0 || d.dredgeVolAct > 0 || d.dredgeLenPlan > 0 || d.dredgeLenAct > 0);
+            const dredgeData = data.filter(d => (d.projectName && d.projectName.includes('ขุดลอก')) || d.dredgeVolPlan > 0 || d.dredgeVolAct > 0 || d.dredgeLenPlan > 0 || d.dredgeLenAct > 0);
             let summary = {};
             let tPVol = 0, tAVol = 0, tPLen = 0, tALen = 0;
 
@@ -422,7 +432,7 @@
                         if (plan > 0) {
                             pctText = ((act / plan) * 100).toFixed(2) + '%';
                         } else if (act > 0) {
-                            pctText = '100.00%'; // หากไม่มีแผน แต่มีผล ให้แสดง 100%
+                            pctText = '100.00%'; 
                         }
                         row += `<td class="fw-bold ${plan > 0 && act >= plan ? 'text-success' : ''}">${pctText}</td>`;
                     }
@@ -431,7 +441,6 @@
                 tbody.insertAdjacentHTML('beforeend', row);
             });
 
-            // แถวสรุปรวมท้ายตาราง
             let totalRow = `<tr class="table-secondary fw-bold"><td class="text-start">รวมทั้งสิ้น</td>`;
             for (let i = 0; i < keys.length; i += 2) {
                 totalRow += `<td>${fmtVal(sums[i])}</td><td>${fmtVal(sums[i+1])}</td>`;
@@ -449,7 +458,6 @@
             tbody.insertAdjacentHTML('beforeend', totalRow);
         }
 
-        // สร้างกราฟโดนัท รองรับกรณีไม่มีแผน
         function createDoughnut(canvasId, planTotal, actTotal) {
             const ctx = document.getElementById(canvasId).getContext('2d');
             let dataVals = [];
@@ -490,6 +498,15 @@
                 }
             });
         }
+
+        // ✅ คำสั่งแก้ปัญหากราฟซ่อนอยู่ใน Tab แล้วไม่แสดงผล
+        document.addEventListener('shown.bs.tab', function (event) {
+            for (let chartId in charts) {
+                if (charts[chartId] && typeof charts[chartId].resize === 'function') {
+                    charts[chartId].resize();
+                }
+            }
+        });
 
         window.onload = loadData;
     </script>
