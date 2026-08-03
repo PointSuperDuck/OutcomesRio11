@@ -214,9 +214,11 @@
 
             name = name.replace(/^โครงการส่งน้ำและบำรุงรักษา/, 'คบ.');
             name = name.replace(/^โครงการชลประทาน/, 'คป.');
+            name = name.replace(/^โครงการก่อสร้าง.*/, 'คส.ชป.11');
             name = name.replace(/^สำนักงานชลประทานที่\s*/, 'สชป.');
-            name = name.replace(/^ส่วนบริหารจัดการน้ำ.*/, 'สบจ.');
-            name = name.replace(/^ส่วนเครื่องจักรกล.*/, 'สจก.');
+            name = name.replace(/^ส่วนบริหารจัดการน้ำ.*/, 'ผจบ.');
+            name = name.replace(/^ส่วนเครื่องจักรกล.*/, 'ผคก.');
+            name = name.replace(/^ส่วนแผนงาน.*/, 'ผผง.');
             return name;
         }
 
