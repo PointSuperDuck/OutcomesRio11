@@ -10,17 +10,46 @@
 
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f0f4f8; }
-        .header-banner { background: linear-gradient(135deg, #0288d1 0%, #01579b 100%); color: white; padding: 18px 20px; border-radius: 0 0 15px 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .card-custom { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; background: #ffffff; }
+        .header-banner {
+            background: linear-gradient(135deg, #0288d1 0%, #01579b 100%);
+            color: white; padding: 18px 20px;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .card-custom {
+            border: none; border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 20px; background: #ffffff;
+        }
         .nav-pills .nav-link { color: #01579b; font-weight: 600; border-radius: 8px; margin-right: 5px; }
         .nav-pills .nav-link.active { background-color: #0288d1; color: white; }
-        .info-box { background-color: #e1f5fe; border-left: 5px solid #0288d1; padding: 14px; border-radius: 6px; font-size: 0.9rem; line-height: 1.6; }
-        .warning-box { background-color: #fff3e0; border: 2px dashed #ff9800; padding: 14px; border-radius: 10px; text-align: center; font-weight: bold; color: #e65100; font-size: 0.95rem; }
-        table th { background-color: #f8fafc; text-align: center; vertical-align: middle; font-size: 0.88rem; }
+        .info-box {
+            background-color: #e1f5fe; border-left: 5px solid #0288d1;
+            padding: 14px; border-radius: 6px; font-size: 0.9rem; line-height: 1.6;
+        }
+        .warning-box {
+            background-color: #fff3e0; border: 2px dashed #ff9800;
+            padding: 14px; border-radius: 10px; text-align: center;
+            font-weight: bold; color: #e65100; font-size: 0.95rem;
+        }
+        table th {
+            background-color: #f8fafc; text-align: center;
+            vertical-align: middle; font-size: 0.88rem;
+        }
         table td { font-size: 0.88rem; text-align: center; vertical-align: middle; }
         .chart-container { position: relative; height: 380px; width: 100%; }
         .doughnut-container { position: relative; height: 210px; width: 100%; }
-        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.92); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        #loading {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.92); z-index: 9999;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+        }
+        .error-box {
+            background-color: #ffebee; border-left: 5px solid #e53935;
+            padding: 14px; border-radius: 6px; font-size: 0.9rem;
+            color: #b71c1c; display: none;
+        }
     </style>
 </head>
 <body>
@@ -33,31 +62,55 @@
     <div class="container-fluid mb-5">
         <div class="header-banner mb-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <h3 class="fw-bold m-0">📊 รายงานแผน-ผล การดำเนินงาน</h3>
+                <h3 class="fw-bold m-0">📊 รายงานแผน-ผล การดำเนินงาน สชป.11</h3>
                 <p class="m-0 opacity-75 fs-6" id="updateTime">ข้อมูล ณ วันที่: -</p>
             </div>
             <button class="btn btn-light btn-sm fw-bold text-primary shadow-sm" onclick="loadData()">🔄 อัปเดตข้อมูล</button>
         </div>
 
-        <ul class="nav nav-pills mb-4" id="dashboardTabs" role="tablist">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab1">1. แผน-ผลการปฏิบัติงาน (%)</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab2">2. กำจัดวัชพืช</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab3">3. ขุดลอกคลอง</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab4">4. จ้างแรงงาน</button></li>
+        <div id="errorBox" class="error-box mb-3 mx-2">
+            ⚠️ <span id="errorMsg"></span>
+        </div>
+
+        <ul class="nav nav-pills mb-4 px-2" id="dashboardTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab1">
+                    1. แผน-ผลการปฏิบัติงาน (%)
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab2">
+                    2. กำจัดวัชพืช
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab3">
+                    3. ขุดลอกคลอง
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab4">
+                    4. จ้างแรงงาน
+                </button>
+            </li>
         </ul>
 
-        <div class="tab-content">
-            
-            <!-- Tab 1 -->
+        <div class="tab-content px-2">
+
+            <!-- ===== TAB 1 ===== -->
             <div class="tab-pane fade show active" id="tab1">
                 <div class="row">
                     <div class="col-lg-9">
                         <div class="card card-custom p-3">
-                            <h6 class="fw-bold text-primary text-center mb-3">1.1 แผน-ผลการปฏิบัติงานเฉลี่ย (%) ทั้งโครงการ</h6>
+                            <h6 class="fw-bold text-primary text-center mb-3">
+                                1.1 แผน-ผลการปฏิบัติงานเฉลี่ย (%) ทั้งโครงการ
+                            </h6>
                             <div class="chart-container"><canvas id="chartAll"></canvas></div>
                         </div>
                         <div class="card card-custom p-3 mt-3">
-                            <h6 class="fw-bold text-success text-center mb-3">1.2 แผน-ผลการปฏิบัติงานเฉลี่ย (%) ปีปัจจุบัน</h6>
+                            <h6 class="fw-bold text-success text-center mb-3">
+                                1.2 แผน-ผลการปฏิบัติงานเฉลี่ย (%) ปีปัจจุบัน
+                            </h6>
                             <div class="chart-container"><canvas id="chartYear"></canvas></div>
                         </div>
                     </div>
@@ -65,7 +118,9 @@
                         <div class="info-box mb-3">
                             <strong>*แผน-ผลทั้งโครงการ</strong> คือ แผน-ผลสะสมการปฏิบัติงานทั้งโครงการ<br><br>
                             <strong>แผน-ผลปีปัจจุบัน</strong> คือ แผน-ผล สะสมงานต่อเนื่องผูกพันใหม่/เดิม เฉพาะปีปัจจุบัน<br><br>
-                            <span class="text-danger fw-bold">**งานปีเดียว แผน-ผล ทั้งโครงการ และปีปัจจุบัน ต้องเท่ากัน</span>
+                            <span class="text-danger fw-bold">
+                                **งานปีเดียว แผน-ผล ทั้งโครงการ และปีปัจจุบัน ต้องเท่ากัน
+                            </span>
                         </div>
                         <div class="warning-box">
                             📢 ขอให้โครงการ/หน่วยงาน<br>บันทึกข้อมูลแผน-ผล<br>การปฏิบัติงาน (%)<br>ในระบบ CEN PROJECT<br>ให้ถูกต้องตามความเป็นจริง
@@ -74,7 +129,7 @@
                 </div>
             </div>
 
-            <!-- Tab 2 -->
+            <!-- ===== TAB 2 ===== -->
             <div class="tab-pane fade" id="tab2">
                 <h5 class="fw-bold mb-3 text-success">🌱 2. ผลการดำเนินงาน กำจัดวัชพืช สชป.11</h5>
                 <div class="row">
@@ -83,7 +138,7 @@
                             <table class="table table-bordered table-hover align-middle mb-0" id="tableWeed">
                                 <thead>
                                     <tr>
-                                        <th rowspan="2" style="width: 25%;">หน่วยงาน</th>
+                                        <th rowspan="2" style="width:25%;">หน่วยงาน</th>
                                         <th colspan="3">กำจัดวัชพืช (ตัน) - เครื่องจักร</th>
                                         <th colspan="3">พื้นที่กำจัดวัชพืช (ไร่) - แรงคน</th>
                                     </tr>
@@ -109,7 +164,7 @@
                 </div>
             </div>
 
-            <!-- Tab 3 -->
+            <!-- ===== TAB 3 ===== -->
             <div class="tab-pane fade" id="tab3">
                 <h5 class="fw-bold mb-3 text-warning">🚜 3. ผลการดำเนินงาน ขุดลอกคลอง สชป.11</h5>
                 <div class="row">
@@ -118,7 +173,7 @@
                             <table class="table table-bordered table-hover align-middle mb-0" id="tableDredge">
                                 <thead>
                                     <tr>
-                                        <th rowspan="2" style="width: 25%;">หน่วยงาน</th>
+                                        <th rowspan="2" style="width:25%;">หน่วยงาน</th>
                                         <th colspan="3">ปริมาณดินขุดลอก (ลบ.ม.)</th>
                                         <th colspan="3">ความยาวขุดลอก (กม.)</th>
                                     </tr>
@@ -144,10 +199,10 @@
                 </div>
             </div>
 
-            <!-- Tab 4 -->
+            <!-- ===== TAB 4 ===== -->
             <div class="tab-pane fade" id="tab4">
-                <h5 class="fw-bold mb-3" style="color: #6a1b9a;">👷 4. ผลการดำเนินงาน จ้างแรงงาน สชป.11</h5>
-                <div class="info-box mb-3" style="background-color: #f3e5f5; border-color: #8e24aa; color: #4a148c;">
+                <h5 class="fw-bold mb-3" style="color:#6a1b9a;">👷 4. ผลการดำเนินงาน จ้างแรงงาน สชป.11</h5>
+                <div class="info-box mb-3" style="background-color:#f3e5f5;border-color:#8e24aa;color:#4a148c;">
                     <strong>การจ้างแรงงาน ให้พิจารณาจ้างแรงงานตามลำดับ คือ:</strong><br>
                     2.1 เกษตรกรที่ขึ้นทะเบียนกับกรมส่งเสริมการเกษตร/เกษตรกรในพื้นที่<br>
                     2.2 สมาชิกกลุ่มผู้ใช้น้ำของกรมชลประทานในพื้นที่ดำเนินโครงการ<br>
@@ -161,7 +216,7 @@
                             <table class="table table-bordered table-hover align-middle mb-0" id="tableLabor">
                                 <thead>
                                     <tr>
-                                        <th rowspan="2" style="width: 22%;">หน่วยงาน</th>
+                                        <th rowspan="2" style="width:22%;">หน่วยงาน</th>
                                         <th colspan="2">แรงงานตามพิจารณา 2.1 (คน)</th>
                                         <th colspan="2">แรงงานนอกเหนือ 2.1 (คน)</th>
                                         <th colspan="2">ค่าจ้างเฉพาะค่าแรง (บาท)</th>
@@ -179,18 +234,24 @@
                 </div>
             </div>
 
-        </div>
-    </div>
+        </div><!-- /tab-content -->
+    </div><!-- /container-fluid -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
+        // =====================================================
+        //  Web App URL (Google Apps Script)
+        // =====================================================
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzR3-OpLxRGQJl_69y_zlcy2DQ-nO8uZt8pz88qVeaWiXuqG6cD0argV-yl3y2UZ8N2ww/exec';
 
+        // =====================================================
+        //  แปลงชื่อหน่วยงานเป็นตัวย่อ
+        // =====================================================
         function getShortAgencyName(fullName) {
             if (!fullName) return 'ไม่ระบุ';
             let name = fullName.trim();
-            
+
             const map = {
                 'สำนักงานชลประทานที่ 11': 'สชป.11',
                 'ส่วนบริหารจัดการน้ำและบำรุงรักษา': 'ผจบ.',
@@ -224,7 +285,9 @@
             return name;
         }
 
-        // ปลั๊กอินเขียนตัวเลขผลต่าง (+/-)
+        // =====================================================
+        //  Plugin: แสดงผลต่าง (+/-) บนแท่งกราฟ Tab 1
+        // =====================================================
         const drawDiffPlugin = {
             id: 'drawDiff',
             afterDatasetsDraw(chart) {
@@ -232,88 +295,112 @@
                 ctx.save();
                 ctx.font = 'bold 11px Sarabun';
                 ctx.textAlign = 'center';
-                
-                // ตรวจสอบว่ากราฟมี 2 datasets หรือไม่ (ป้องกัน Error ในกราฟโดนัท)
-                if (data.datasets.length < 2) {
-                    ctx.restore();
-                    return; 
-                }
 
                 const planMeta = chart.getDatasetMeta(0);
-                const actMeta = chart.getDatasetMeta(1);
+                const actMeta  = chart.getDatasetMeta(1);
 
                 planMeta.data.forEach((bar, index) => {
                     const planVal = Number(data.datasets[0].data[index]) || 0;
-                    const actVal = Number(data.datasets[1].data[index]) || 0;
-                    const diff = (actVal - planVal).toFixed(2);
-                    
+                    const actVal  = Number(data.datasets[1].data[index]) || 0;
+                    const diff    = (actVal - planVal).toFixed(2);
+
                     if (planVal === 0 && actVal === 0) return;
 
                     const yPos = Math.min(planMeta.data[index].y, actMeta.data[index].y) - 8;
                     const xPos = (planMeta.data[index].x + actMeta.data[index].x) / 2;
 
                     ctx.fillStyle = diff > 0 ? '#2e7d32' : (diff < 0 ? '#d32f2f' : '#616161');
-                    const text = diff > 0 ? `+${diff}` : diff;
-                    ctx.fillText(text, xPos, yPos);
+                    ctx.fillText(diff > 0 ? `+${diff}` : diff, xPos, yPos);
                 });
                 ctx.restore();
             }
         };
+        Chart.register(drawDiffPlugin);
 
-        // ❌ เอา Chart.register(drawDiffPlugin); ออก เพื่อไม่ให้ไปกระทบกราฟโดนัท
-
+        // =====================================================
+        //  Chart instances cache
+        // =====================================================
         let charts = {};
 
+        // =====================================================
+        //  MAIN: โหลดข้อมูลจาก Google Apps Script
+        // =====================================================
         async function loadData() {
             document.getElementById('loading').style.display = 'flex';
+            document.getElementById('errorBox').style.display = 'none';
+
             try {
                 const response = await fetch(WEB_APP_URL);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
                 const result = await response.json();
-                
                 document.getElementById('loading').style.display = 'none';
-                
+
                 if (result.status === 'success') {
-                    document.getElementById('updateTime').innerText = `ข้อมูล ณ วันที่: ${result.updated}`;
+                    document.getElementById('updateTime').innerText =
+                        `ข้อมูล ณ วันที่: ${result.updated}`;
                     processTab1(result.data);
                     processTab2(result.data);
                     processTab3(result.data);
                     processTab4(result.data);
                 } else {
-                    alert('เกิดข้อผิดพลาด: ' + result.error);
+                    showError('เกิดข้อผิดพลาดจาก API: ' + (result.error || 'ไม่ทราบสาเหตุ'));
                 }
             } catch (error) {
-                alert('ไม่สามารถเชื่อมต่อข้อมูลได้ กรุณาตรวจสอบ URL หรือ Network');
                 document.getElementById('loading').style.display = 'none';
+                showError('ไม่สามารถเชื่อมต่อข้อมูลได้ — ' + error.message +
+                    ' (กรุณาตรวจสอบ URL หรือ Network)');
             }
         }
 
-        // ================= TAB 1 =================
+        function showError(msg) {
+            const box = document.getElementById('errorBox');
+            document.getElementById('errorMsg').innerText = msg;
+            box.style.display = 'block';
+        }
+
+        // =====================================================
+        //  TAB 1 — แผน-ผลการปฏิบัติงาน (%)
+        // =====================================================
         function processTab1(data) {
             let agencyStats = {};
+
             data.forEach(row => {
-                const agShort = getShortAgencyName(row.agency);
-                if (!agencyStats[agShort]) agencyStats[agShort] = { paSum: 0, aaSum: 0, cA: 0, pySum: 0, aySum: 0, cY: 0 };
-                
+                const ag = getShortAgencyName(row.agency);
+                if (!agencyStats[ag]) {
+                    agencyStats[ag] = { paSum:0, aaSum:0, cA:0, pySum:0, aySum:0, cY:0 };
+                }
                 if (row.planAll > 0 || row.actualAll > 0) {
-                    agencyStats[agShort].paSum += row.planAll;
-                    agencyStats[agShort].aaSum += row.actualAll;
-                    agencyStats[agShort].cA++;
+                    agencyStats[ag].paSum += Number(row.planAll)   || 0;
+                    agencyStats[ag].aaSum += Number(row.actualAll) || 0;
+                    agencyStats[ag].cA++;
                 }
                 if (row.planYear > 0 || row.actualYear > 0) {
-                    agencyStats[agShort].pySum += row.planYear;
-                    agencyStats[agShort].aySum += row.actualYear;
-                    agencyStats[agShort].cY++;
+                    agencyStats[ag].pySum += Number(row.planYear)   || 0;
+                    agencyStats[ag].aySum += Number(row.actualYear) || 0;
+                    agencyStats[ag].cY++;
                 }
             });
 
-            const labels = Object.keys(agencyStats);
-            const planAllData = labels.map(ag => agencyStats[ag].cA > 0 ? (agencyStats[ag].paSum / agencyStats[ag].cA).toFixed(2) : 0);
-            const actAllData = labels.map(ag => agencyStats[ag].cA > 0 ? (agencyStats[ag].aaSum / agencyStats[ag].cA).toFixed(2) : 0);
-            
-            const planYearData = labels.map(ag => agencyStats[ag].cY > 0 ? (agencyStats[ag].pySum / agencyStats[ag].cY).toFixed(2) : 0);
-            const actYearData = labels.map(ag => agencyStats[ag].cY > 0 ? (agencyStats[ag].aySum / agencyStats[ag].cY).toFixed(2) : 0);
+            const labels      = Object.keys(agencyStats);
+            const planAllData = labels.map(ag =>
+                agencyStats[ag].cA > 0
+                    ? (agencyStats[ag].paSum / agencyStats[ag].cA).toFixed(2)
+                    : 0);
+            const actAllData  = labels.map(ag =>
+                agencyStats[ag].cA > 0
+                    ? (agencyStats[ag].aaSum / agencyStats[ag].cA).toFixed(2)
+                    : 0);
+            const planYearData = labels.map(ag =>
+                agencyStats[ag].cY > 0
+                    ? (agencyStats[ag].pySum / agencyStats[ag].cY).toFixed(2)
+                    : 0);
+            const actYearData  = labels.map(ag =>
+                agencyStats[ag].cY > 0
+                    ? (agencyStats[ag].aySum / agencyStats[ag].cY).toFixed(2)
+                    : 0);
 
-            createBarChart('chartAll', labels, planAllData, actAllData);
+            createBarChart('chartAll',  labels, planAllData,  actAllData);
             createBarChart('chartYear', labels, planYearData, actYearData);
         }
 
@@ -326,7 +413,7 @@
                     labels: labels,
                     datasets: [
                         { label: 'แผน (%)', data: planData, backgroundColor: '#e53935' },
-                        { label: 'ผล (%)', data: actData, backgroundColor: '#1e88e5' }
+                        { label: 'ผล (%)',  data: actData,  backgroundColor: '#1e88e5' }
                     ]
                 },
                 options: {
@@ -335,48 +422,67 @@
                     scales: {
                         y: { max: 105, beginAtZero: true },
                         x: { ticks: { font: { family: 'Sarabun', size: 11 } } }
-                    }
-                },
-                // ✅ ใส่ Plugin เข้าไปเฉพาะกับกราฟแบบ Bar Chart เท่านั้น
-                plugins: [drawDiffPlugin] 
+                    },
+                    plugins: { legend: { position: 'bottom' } }
+                }
             });
         }
 
-        // ================= TAB 2 (กำจัดวัชพืช) =================
+        // =====================================================
+        //  TAB 2 — กำจัดวัชพืช
+        // =====================================================
         function processTab2(data) {
-            const weedData = data.filter(d => (d.projectName && d.projectName.includes('กำจัดวัชพืช')) || d.weedTonsPlan > 0 || d.weedTonsAct > 0 || d.weedRaiPlan > 0 || d.weedRaiAct > 0);
+            const weedData = data.filter(d =>
+                (d.projectName && d.projectName.includes('กำจัดวัชพืช')) ||
+                d.weedTonsPlan > 0 || d.weedTonsAct > 0 ||
+                d.weedRaiPlan  > 0 || d.weedRaiAct  > 0
+            );
+
             let summary = {};
             let tPlanTons = 0, tActTons = 0, tPlanRai = 0, tActRai = 0;
 
             weedData.forEach(r => {
                 const ag = getShortAgencyName(r.agency);
                 if (!summary[ag]) summary[ag] = { pT:0, aT:0, pR:0, aR:0 };
-                summary[ag].pT += r.weedTonsPlan; summary[ag].aT += r.weedTonsAct;
-                summary[ag].pR += r.weedRaiPlan; summary[ag].aR += r.weedRaiAct;
-                
-                tPlanTons += r.weedTonsPlan; tActTons += r.weedTonsAct;
-                tPlanRai += r.weedRaiPlan; tActRai += r.weedRaiAct;
+                summary[ag].pT += Number(r.weedTonsPlan) || 0;
+                summary[ag].aT += Number(r.weedTonsAct)  || 0;
+                summary[ag].pR += Number(r.weedRaiPlan)  || 0;
+                summary[ag].aR += Number(r.weedRaiAct)   || 0;
+                tPlanTons += Number(r.weedTonsPlan) || 0;
+                tActTons  += Number(r.weedTonsAct)  || 0;
+                tPlanRai  += Number(r.weedRaiPlan)  || 0;
+                tActRai   += Number(r.weedRaiAct)   || 0;
             });
 
             renderTable('tableWeed', summary, ['pT','aT','pR','aR'], true);
             createDoughnut('donutWeedTons', tPlanTons, tActTons);
-            createDoughnut('donutWeedRai', tPlanRai, tActRai);
+            createDoughnut('donutWeedRai',  tPlanRai,  tActRai);
         }
 
-        // ================= TAB 3 (ขุดลอกคลอง) =================
+        // =====================================================
+        //  TAB 3 — ขุดลอกคลอง
+        // =====================================================
         function processTab3(data) {
-            const dredgeData = data.filter(d => (d.projectName && d.projectName.includes('ขุดลอก')) || d.dredgeVolPlan > 0 || d.dredgeVolAct > 0 || d.dredgeLenPlan > 0 || d.dredgeLenAct > 0);
+            const dredgeData = data.filter(d =>
+                (d.projectName && d.projectName.includes('ขุดลอก')) ||
+                d.dredgeVolPlan > 0 || d.dredgeVolAct > 0 ||
+                d.dredgeLenPlan > 0 || d.dredgeLenAct > 0
+            );
+
             let summary = {};
             let tPVol = 0, tAVol = 0, tPLen = 0, tALen = 0;
 
             dredgeData.forEach(r => {
                 const ag = getShortAgencyName(r.agency);
                 if (!summary[ag]) summary[ag] = { pV:0, aV:0, pL:0, aL:0 };
-                summary[ag].pV += r.dredgeVolPlan; summary[ag].aV += r.dredgeVolAct;
-                summary[ag].pL += r.dredgeLenPlan; summary[ag].aL += r.dredgeLenAct;
-                
-                tPVol += r.dredgeVolPlan; tAVol += r.dredgeVolAct;
-                tPLen += r.dredgeLenPlan; tALen += r.dredgeLenAct;
+                summary[ag].pV += Number(r.dredgeVolPlan) || 0;
+                summary[ag].aV += Number(r.dredgeVolAct)  || 0;
+                summary[ag].pL += Number(r.dredgeLenPlan) || 0;
+                summary[ag].aL += Number(r.dredgeLenAct)  || 0;
+                tPVol += Number(r.dredgeVolPlan) || 0;
+                tAVol += Number(r.dredgeVolAct)  || 0;
+                tPLen += Number(r.dredgeLenPlan) || 0;
+                tALen += Number(r.dredgeLenAct)  || 0;
             });
 
             renderTable('tableDredge', summary, ['pV','aV','pL','aL'], true);
@@ -384,97 +490,130 @@
             createDoughnut('donutDredgeLen', tPLen, tALen);
         }
 
-        // ================= TAB 4 (จ้างแรงงาน) =================
+        // =====================================================
+        //  TAB 4 — จ้างแรงงาน
+        // =====================================================
         function processTab4(data) {
-            const laborData = data.filter(d => d.wagePlan > 0 || d.wageAct > 0 || d.labor21Plan > 0 || d.labor21Act > 0 || d.laborNon21Plan > 0 || d.laborNon21Act > 0);
-            let summary = {};
+            const laborData = data.filter(d =>
+                d.wagePlan      > 0 || d.wageAct      > 0 ||
+                d.labor21Plan   > 0 || d.labor21Act   > 0 ||
+                d.laborNon21Plan > 0 || d.laborNon21Act > 0
+            );
 
+            let summary = {};
             laborData.forEach(r => {
                 const ag = getShortAgencyName(r.agency);
                 if (!summary[ag]) summary[ag] = { p21:0, a21:0, pN:0, aN:0, pW:0, aW:0 };
-                
-                summary[ag].p21 += r.labor21Plan; summary[ag].a21 += r.labor21Act;
-                summary[ag].pN += r.laborNon21Plan; summary[ag].aN += r.laborNon21Act;
-                summary[ag].pW += r.wagePlan; summary[ag].aW += r.wageAct;
+                summary[ag].p21 += Number(r.labor21Plan)    || 0;
+                summary[ag].a21 += Number(r.labor21Act)     || 0;
+                summary[ag].pN  += Number(r.laborNon21Plan) || 0;
+                summary[ag].aN  += Number(r.laborNon21Act)  || 0;
+                summary[ag].pW  += Number(r.wagePlan)       || 0;
+                summary[ag].aW  += Number(r.wageAct)        || 0;
             });
 
             renderTable('tableLabor', summary, ['p21','a21','pN','aN','pW','aW'], false);
         }
 
-        // ================= HELPER FUNCTIONS =================
+        // =====================================================
+        //  HELPER: format ตัวเลข
+        // =====================================================
         function fmtVal(val) {
             if (val === null || val === undefined || val === 0) return '-';
-            return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            return Number(val).toLocaleString('th-TH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
         }
 
+        // =====================================================
+        //  HELPER: render ตาราง
+        // =====================================================
         function renderTable(tableId, dataObj, keys, showPct) {
             const tbody = document.querySelector(`#${tableId} tbody`);
             tbody.innerHTML = '';
-            let sums = keys.map(() => 0);
 
             const agencies = Object.keys(dataObj);
+            const colSpan  = showPct
+                ? keys.length + (keys.length / 2) + 1
+                : keys.length + 1;
+
             if (agencies.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${showPct ? keys.length + 1 + (keys.length/2) : keys.length + 1}" class="text-muted">ไม่พบข้อมูล</td></tr>`;
+                tbody.innerHTML =
+                    `<tr><td colspan="${colSpan}" class="text-muted text-center">ไม่พบข้อมูล</td></tr>`;
                 return;
             }
+
+            let sums = keys.map(() => 0);
 
             agencies.forEach(ag => {
                 let row = `<tr><td class="text-start fw-semibold">${ag}</td>`;
                 for (let i = 0; i < keys.length; i += 2) {
-                    let plan = dataObj[ag][keys[i]];
-                    let act = dataObj[ag][keys[i+1]];
-                    sums[i] += plan; sums[i+1] += act;
-                    
+                    const plan = dataObj[ag][keys[i]]   || 0;
+                    const act  = dataObj[ag][keys[i+1]] || 0;
+                    sums[i]   += plan;
+                    sums[i+1] += act;
+
                     row += `<td>${fmtVal(plan)}</td><td>${fmtVal(act)}</td>`;
-                    
+
                     if (showPct) {
                         let pctText = '-';
+                        let pctClass = '';
                         if (plan > 0) {
-                            pctText = ((act / plan) * 100).toFixed(2) + '%';
+                            const pct = (act / plan) * 100;
+                            pctText  = pct.toFixed(2) + '%';
+                            pctClass = pct >= 100 ? 'text-success fw-bold' : 'text-danger fw-bold';
                         } else if (act > 0) {
-                            pctText = '100.00%'; 
+                            pctText  = '100.00%';
+                            pctClass = 'text-success fw-bold';
                         }
-                        row += `<td class="fw-bold ${plan > 0 && act >= plan ? 'text-success' : ''}">${pctText}</td>`;
+                        row += `<td class="${pctClass}">${pctText}</td>`;
                     }
                 }
                 row += `</tr>`;
                 tbody.insertAdjacentHTML('beforeend', row);
             });
 
+            // แถวรวมท้ายตาราง
             let totalRow = `<tr class="table-secondary fw-bold"><td class="text-start">รวมทั้งสิ้น</td>`;
             for (let i = 0; i < keys.length; i += 2) {
                 totalRow += `<td>${fmtVal(sums[i])}</td><td>${fmtVal(sums[i+1])}</td>`;
                 if (showPct) {
-                    let pctText = '-';
+                    let pctText  = '-';
+                    let pctClass = 'text-primary';
                     if (sums[i] > 0) {
-                        pctText = ((sums[i+1] / sums[i]) * 100).toFixed(2) + '%';
+                        const pct = (sums[i+1] / sums[i]) * 100;
+                        pctText  = pct.toFixed(2) + '%';
+                        pctClass = pct >= 100 ? 'text-success fw-bold' : 'text-primary fw-bold';
                     } else if (sums[i+1] > 0) {
-                        pctText = '100.00%';
+                        pctText  = '100.00%';
+                        pctClass = 'text-success fw-bold';
                     }
-                    totalRow += `<td class="text-primary">${pctText}</td>`;
+                    totalRow += `<td class="${pctClass}">${pctText}</td>`;
                 }
             }
             totalRow += `</tr>`;
             tbody.insertAdjacentHTML('beforeend', totalRow);
         }
 
+        // =====================================================
+        //  HELPER: สร้างกราฟโดนัท
+        // =====================================================
         function createDoughnut(canvasId, planTotal, actTotal) {
             const ctx = document.getElementById(canvasId).getContext('2d');
-            let dataVals = [];
-            let bgColors = [];
-            let labels = [];
+            let dataVals, bgColors, labels;
 
-            if ((!planTotal || planTotal === 0) && (!actTotal || actTotal === 0)) {
-                labels = ['ไม่มีข้อมูล'];
+            if (!planTotal && !actTotal) {
+                labels   = ['ไม่มีข้อมูล'];
                 dataVals = [1];
                 bgColors = ['#e0e0e0'];
-            } else if (!planTotal || planTotal === 0) {
-                labels = ['ผลดำเนินการ'];
+            } else if (!planTotal) {
+                labels   = ['ผลดำเนินการ'];
                 dataVals = [actTotal];
                 bgColors = ['#c62828'];
             } else {
                 const remain = Math.max(0, planTotal - actTotal);
-                labels = ['ผลดำเนินการ', 'แผนคงเหลือ'];
+                labels   = ['ผลดำเนินการ', 'แผนคงเหลือ'];
                 dataVals = [actTotal, remain];
                 bgColors = ['#c62828', '#1565c0'];
             }
@@ -484,30 +623,19 @@
                 type: 'doughnut',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        data: dataVals,
-                        backgroundColor: bgColors
-                    }]
+                    datasets: [{ data: dataVals, backgroundColor: bgColors }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
+                    plugins: { legend: { position: 'bottom' } }
                 }
             });
         }
 
-        // ✅ คำสั่งแก้ปัญหากราฟซ่อนอยู่ใน Tab แล้วไม่แสดงผล
-        document.addEventListener('shown.bs.tab', function (event) {
-            for (let chartId in charts) {
-                if (charts[chartId] && typeof charts[chartId].resize === 'function') {
-                    charts[chartId].resize();
-                }
-            }
-        });
-
+        // =====================================================
+        //  เริ่มโหลดข้อมูลเมื่อหน้าพร้อม
+        // =====================================================
         window.onload = loadData;
     </script>
 </body>
