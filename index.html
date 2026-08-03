@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายงานแผน-ผล การดำเนินงาน</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f0f4f8; }
+        .header-banner { background: linear-gradient(135deg, #0288d1 0%, #01579b 100%); color: white; padding: 20px; border-radius: 0 0 15px 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .card-custom { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .nav-pills .nav-link { color: #01579b; font-weight: 600; border-radius: 8px; margin-right: 5px; }
+        .nav-pills .nav-link.active { background-color: #0288d1; color: white; }
+        .info-box { background-color: #e1f5fe; border-left: 5px solid #0288d1; padding: 15px; border-radius: 5px; font-size: 0.95rem; }
+        .warning-box { background-color: #fff3e0; border: 2px dashed #ff9800; padding: 15px; border-radius: 10px; text-align: center; font-weight: bold; color: #e65100; }
+        table th { background-color: #f5f5f5; text-align: center; vertical-align: middle; }
+        .diff-pos { color: #2e7d32; font-weight: bold; }
+        .diff-neg { color: #d32f2f; font-weight: bold; }
+        .chart-container { position: relative; height: 350px; width: 100%; }
+        .doughnut-container { position: relative; height: 200px; width: 100%; }
+        #loading { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body>
+
+    <div id="loading">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+        <h4 class="mt-3 text-primary fw-bold">กำลังดึงข้อมูล...</h4>
+    </div>
+
+    <div class="container-fluid mb-5">
+        <div class="header-banner mb-4">
+            <h2 class="fw-bold m-0">📊 รายงานแผน-ผล การดำเนินงาน</h2>
+            <p class="m-0 opacity-75" id="updateTime">ข้อมูล ณ วันที่: -</p>
+        </div>
+
+        <ul class="nav nav-pills mb-4" id="dashboardTabs" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab1">1. แผน-ผลการปฏิบัติงาน (%)</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab2">2. กำจัดวัชพืช</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab3">3. ขุดลอกคลอง</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab4">4. จ้างแรงงาน</button></li>
+        </ul>
+
+        <div class="tab-content">
+            
+            <div class="tab-pane fade show active" id="tab1">
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="card card-custom p-3">
+                            <h5 class="fw-bold text-primary text-center">แผน-ผลการปฏิบัติงานเฉลี่ย (ทั้งโครงการ)</h5>
+                            <div class="chart-container"><canvas id="chartAll"></canvas></div>
+                        </div>
+                        <div class="card card-custom p-3 mt-4">
+                            <h5 class="fw-bold text-success text-center">แผน-ผลการปฏิบัติงานเฉลี่ย (ปีปัจจุบัน)</h5>
+                            <div class="chart-container"><canvas id="chartYear"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="info-box mb-4">
+                            <strong>*แผน-ผลทั้งโครงการ</strong> คือ แผน-ผลสะสมการปฏิบัติงานทั้งโครงการ<br><br>
+                            <strong>แผน-ผลปีปัจจุบัน</strong> คือ แผน-ผล สะสมงานต่อเนื่องผูกพันใหม่/เดิม เฉพาะปีปัจจุบัน<br><br>
+                            <span class="text-danger">**งานปีเดียว แผน-ผล ทั้งโครงการ และปีปัจจุบัน ต้องเท่ากัน</span>
+                        </div>
+                        <div class="warning-box">
+                            📢 ขอให้โครงการ/หน่วยงาน<br>บันทึกข้อมูลแผน-ผล<br>การปฏิบัติงาน (%)<br>ในระบบ CEN PROJECT<br>ให้ถูกต้องตามความเป็นจริง
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="tab2">
+                <h4 class="fw-bold mb-3 text-success">🌱 ผลการดำเนินงาน กำจัดวัชพืช</h4>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card card-custom p-3 overflow-auto">
+                            <table class="table table-bordered table-hover align-middle" id="tableWeed">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">หน่วยงาน</th>
+                                        <th colspan="3">กำจัดวัชพืช (ตัน) - เครื่องจักร</th>
+                                        <th colspan="3">พื้นที่ (ไร่) - แรงคน</th>
+                                    </tr>
+                                    <tr>
+                                        <th>แผน</th><th>ผล</th><th>ร้อยละ</th>
+                                        <th>แผน</th><th>ผล</th><th>ร้อยละ</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-custom p-3 text-center mb-3">
+                            <h6 class="fw-bold">กำจัดวัชพืช (ตัน)</h6>
+                            <div class="doughnut-container"><canvas id="donutWeedTons"></canvas></div>
+                        </div>
+                        <div class="card card-custom p-3 text-center">
+                            <h6 class="fw-bold">พื้นที่กำจัดวัชพืช (ไร่)</h6>
+                            <div class="doughnut-container"><canvas id="donutWeedRai"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="tab3">
+                <h4 class="fw-bold mb-3 text-warning">🚜 ผลการดำเนินงาน ขุดลอกคลอง</h4>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card card-custom p-3 overflow-auto">
+                            <table class="table table-bordered table-hover align-middle" id="tableDredge">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">หน่วยงาน</th>
+                                        <th colspan="3">ปริมาณดิน (ลบ.ม.)</th>
+                                        <th colspan="3">ความยาว (กม.)</th>
+                                    </tr>
+                                    <tr>
+                                        <th>แผน</th><th>ผล</th><th>ร้อยละ</th>
+                                        <th>แผน</th><th>ผล</th><th>ร้อยละ</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-custom p-3 text-center mb-3">
+                            <h6 class="fw-bold">ขุดลอกปริมาณดิน (ลบ.ม.)</h6>
+                            <div class="doughnut-container"><canvas id="donutDredgeVol"></canvas></div>
+                        </div>
+                        <div class="card card-custom p-3 text-center">
+                            <h6 class="fw-bold">ความยาวขุดลอก (กม.)</h6>
+                            <div class="doughnut-container"><canvas id="donutDredgeLen"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="tab4">
+                <h4 class="fw-bold mb-3" style="color: #6a1b9a;">👷 ผลการดำเนินงาน จ้างแรงงาน</h4>
+                <div class="info-box mb-4" style="background-color: #f3e5f5; border-color: #8e24aa;">
+                    <strong>การจ้างแรงงาน ให้พิจารณาจ้างแรงงานตามลำดับ คือ:</strong><br>
+                    2.1 เกษตรกรที่ขึ้นทะเบียนกับกรมส่งเสริมการเกษตร/เกษตรกรในพื้นที่<br>
+                    2.2 สมาชิกกลุ่มผู้ใช้น้ำของกรมชลประทานในพื้นที่ดำเนินโครงการ<br>
+                    2.3 ประชาชน และผู้ใช้แรงงานทั่วไปที่ได้รับผลกระทบจากอุทกภัย/ภัยแล้ง<br>
+                    2.4 ประชาชน และผู้ใช้แรงงานทั่วไป ในพื้นที่<br>
+                    2.5 แรงงานที่ต้องการในพื้นที่เป้าหมายมีไม่เพียงพอ ให้พิจารณาจ้างเกษตรกร/แรงงานในพื้นที่ใกล้เคียงจากหมู่บ้าน ตำบล อำเภอ จังหวัด
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card card-custom p-3 overflow-auto">
+                            <table class="table table-bordered table-hover align-middle" id="tableLabor">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2">หน่วยงาน</th>
+                                        <th colspan="2">แรงงานตามพิจารณา 2.1 (คน)</th>
+                                        <th colspan="2">แรงงานนอกเหนือ 2.1 (คน)</th>
+                                        <th colspan="2">ค่าจ้างเฉพาะค่าแรง (บาท)</th>
+                                    </tr>
+                                    <tr>
+                                        <th>แผน</th><th>ผล</th>
+                                        <th>แผน</th><th>ผล</th>
+                                        <th>แผน</th><th>ผล</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ⚠️ ใส่ Web App URL ของคุณที่นี่
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxxxxxxx/exec';
+
+        // ปลั๊กอินสร้างตัวหนังสือโชว์ผลต่าง (+/-) บนแท่งกราฟ Tab 1
+        const drawDiffPlugin = {
+            id: 'drawDiff',
+            afterDatasetsDraw(chart) {
+                const { ctx, data } = chart;
+                ctx.save();
+                ctx.font = 'bold 11px Sarabun';
+                ctx.textAlign = 'center';
+                
+                const planMeta = chart.getDatasetMeta(0);
+                const actMeta = chart.getDatasetMeta(1);
+
+                planMeta.data.forEach((bar, index) => {
+                    const planVal = data.datasets[0].data[index];
+                    const actVal = data.datasets[1].data[index];
+                    const diff = (actVal - planVal).toFixed(2);
+                    
+                    if (planVal === 0 && actVal === 0) return;
+
+                    // หาจุดสูงสุดของแท่งที่สูงกว่าเพื่อวางข้อความ
+                    const yPos = Math.min(planMeta.data[index].y, actMeta.data[index].y) - 10;
+                    const xPos = (planMeta.data[index].x + actMeta.data[index].x) / 2;
+
+                    ctx.fillStyle = diff > 0 ? '#2e7d32' : (diff < 0 ? '#d32f2f' : '#757575');
+                    const text = diff > 0 ? `+${diff}` : diff;
+                    ctx.fillText(text, xPos, yPos);
+                });
+                ctx.restore();
+            }
+        };
+        Chart.register(drawDiffPlugin);
+
+        let charts = {};
+
+        async function loadData() {
+            try {
+                // สำหรับทดสอบ สามารถเปลี่ยนเป็นการใช้ Mock Data ได้หาก Web App ยังไม่เสร็จ
+                const response = await fetch(WEB_APP_URL); 
+                const result = await response.json();
+                
+                document.getElementById('loading').style.display = 'none';
+                
+                if (result.status === 'success') {
+                    document.getElementById('updateTime').innerText = `ข้อมูล ณ วันที่: ${result.updated}`;
+                    processTab1(result.data);
+                    processTab2(result.data);
+                    processTab3(result.data);
+                    processTab4(result.data);
+                } else {
+                    alert('เกิดข้อผิดพลาด: ' + result.error);
+                }
+            } catch (error) {
+                alert('ไม่สามารถเชื่อมต่อข้อมูลได้ กรุณาตรวจสอบ URL หรือ Network');
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // ================= Process Tab 1 =================
+        function processTab1(data) {
+            let agencyStats = {};
+            data.forEach(row => {
+                const ag = row.agency;
+                if (!agencyStats[ag]) agencyStats[ag] = { paSum: 0, aaSum: 0, cA: 0, pySum: 0, aySum: 0, cY: 0 };
+                
+                // แผน-ผล ทั้งโครงการ
+                if (row.planAll > 0 || row.actualAll > 0) {
+                    agencyStats[ag].paSum += row.planAll;
+                    agencyStats[ag].aaSum += row.actualAll;
+                    agencyStats[ag].cA++;
+                }
+                // แผน-ผล ปีปัจจุบัน
+                if (row.planYear > 0 || row.actualYear > 0) {
+                    agencyStats[ag].pySum += row.planYear;
+                    agencyStats[ag].aySum += row.actualYear;
+                    agencyStats[ag].cY++;
+                }
+            });
+
+            const labels = Object.keys(agencyStats);
+            const planAllData = labels.map(ag => agencyStats[ag].cA > 0 ? (agencyStats[ag].paSum / agencyStats[ag].cA).toFixed(2) : 0);
+            const actAllData = labels.map(ag => agencyStats[ag].cA > 0 ? (agencyStats[ag].aaSum / agencyStats[ag].cA).toFixed(2) : 0);
+            
+            const planYearData = labels.map(ag => agencyStats[ag].cY > 0 ? (agencyStats[ag].pySum / agencyStats[ag].cY).toFixed(2) : 0);
+            const actYearData = labels.map(ag => agencyStats[ag].cY > 0 ? (agencyStats[ag].aySum / agencyStats[ag].cY).toFixed(2) : 0);
+
+            createBarChart('chartAll', labels, planAllData, actAllData);
+            createBarChart('chartYear', labels, planYearData, actYearData);
+        }
+
+        function createBarChart(canvasId, labels, planData, actData) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            if(charts[canvasId]) charts[canvasId].destroy();
+            charts[canvasId] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'แผน (%)', data: planData, backgroundColor: '#d32f2f' },
+                        { label: 'ผล (%)', data: actData, backgroundColor: '#1976d2' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { max: 100, beginAtZero: true } },
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        // ================= Process Tab 2 (Weed) =================
+        function processTab2(data) {
+            const weedData = data.filter(d => d.projectName.includes('กำจัดวัชพืช'));
+            let summary = {};
+            let tPlanTons = 0, tActTons = 0, tPlanRai = 0, tActRai = 0;
+
+            weedData.forEach(r => {
+                const ag = r.agency;
+                if(!summary[ag]) summary[ag] = { pT:0, aT:0, pR:0, aR:0 };
+                summary[ag].pT += r.weedTonsPlan; summary[ag].aT += r.weedTonsAct;
+                summary[ag].pR += r.weedRaiPlan; summary[ag].aR += r.weedRaiAct;
+                
+                tPlanTons += r.weedTonsPlan; tActTons += r.weedTonsAct;
+                tPlanRai += r.weedRaiPlan; tActRai += r.weedRaiAct;
+            });
+
+            renderTable('tableWeed', summary, ['pT','aT','pR','aR'], true);
+            createDoughnut('donutWeedTons', tPlanTons, tActTons);
+            createDoughnut('donutWeedRai', tPlanRai, tActRai);
+        }
+
+        // ================= Process Tab 3 (Dredge) =================
+        function processTab3(data) {
+            const dredgeData = data.filter(d => d.dredgeVolPlan > 0 || d.dredgeLenPlan > 0);
+            let summary = {};
+            let tPVol = 0, tAVol = 0, tPLen = 0, tALen = 0;
+
+            dredgeData.forEach(r => {
+                const ag = r.agency;
+                if(!summary[ag]) summary[ag] = { pV:0, aV:0, pL:0, aL:0 };
+                summary[ag].pV += r.dredgeVolPlan; summary[ag].aV += r.dredgeVolAct;
+                summary[ag].pL += r.dredgeLenPlan; summary[ag].aL += r.dredgeLenAct;
+                
+                tPVol += r.dredgeVolPlan; tAVol += r.dredgeVolAct;
+                tPLen += r.dredgeLenPlan; tALen += r.dredgeLenAct;
+            });
+
+            renderTable('tableDredge', summary, ['pV','aV','pL','aL'], true);
+            createDoughnut('donutDredgeVol', tPVol, tAVol);
+            createDoughnut('donutDredgeLen', tPLen, tALen);
+        }
+
+        // ================= Process Tab 4 (Labor) =================
+        function processTab4(data) {
+            const laborData = data.filter(d => d.wagePlan > 0);
+            let summary = {};
+            let totals = { p21:0, a21:0, pN:0, aN:0, pW:0, aW:0 };
+
+            laborData.forEach(r => {
+                const ag = r.agency;
+                if(!summary[ag]) summary[ag] = { p21:0, a21:0, pN:0, aN:0, pW:0, aW:0 };
+                
+                summary[ag].p21 += r.labor21Plan; summary[ag].a21 += r.labor21Act;
+                summary[ag].pN += r.laborNon21Plan; summary[ag].aN += r.laborNon21Act;
+                summary[ag].pW += r.wagePlan; summary[ag].aW += r.wageAct;
+
+                totals.p21 += r.labor21Plan; totals.a21 += r.labor21Act;
+                totals.pN += r.laborNon21Plan; totals.aN += r.laborNon21Act;
+                totals.pW += r.wagePlan; totals.aW += r.wageAct;
+            });
+
+            renderTable('tableLabor', summary, ['p21','a21','pN','aN','pW','aW'], false);
+        }
+
+        // ================= Helper Functions =================
+        function renderTable(tableId, dataObj, keys, showPct) {
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            tbody.innerHTML = '';
+            let sums = keys.map(() => 0);
+
+            Object.keys(dataObj).forEach(ag => {
+                let row = `<tr><td class="text-start">${ag}</td>`;
+                for(let i=0; i<keys.length; i+=2) {
+                    let plan = dataObj[ag][keys[i]];
+                    let act = dataObj[ag][keys[i+1]];
+                    sums[i] += plan; sums[i+1] += act;
+                    
+                    row += `<td>${plan.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                            <td>${act.toLocaleString(undefined, {minimumFractionDigits:2})}</td>`;
+                    
+                    if(showPct) {
+                        let pct = plan > 0 ? ((act/plan)*100).toFixed(2) : '0.00';
+                        row += `<td>${pct}%</td>`;
+                    }
+                }
+                row += `</tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+
+            // แถวรวม
+            let totalRow = `<tr class="table-secondary fw-bold"><td class="text-start">รวมทั้งสิ้น</td>`;
+            for(let i=0; i<keys.length; i+=2) {
+                totalRow += `<td>${sums[i].toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                             <td>${sums[i+1].toLocaleString(undefined, {minimumFractionDigits:2})}</td>`;
+                if(showPct) {
+                    let pct = sums[i] > 0 ? ((sums[i+1]/sums[i])*100).toFixed(2) : '0.00';
+                    totalRow += `<td>${pct}%</td>`;
+                }
+            }
+            totalRow += `</tr>`;
+            tbody.insertAdjacentHTML('beforeend', totalRow);
+        }
+
+        function createDoughnut(canvasId, planTotal, actTotal) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            const remain = Math.max(0, planTotal - actTotal);
+            
+            if(charts[canvasId]) charts[canvasId].destroy();
+            charts[canvasId] = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['ผลดำเนินการ', 'แผนคงเหลือ'],
+                    datasets: [{
+                        data: [actTotal, remain],
+                        backgroundColor: ['#c62828', '#1565c0']
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        // เริ่มต้นทำงาน
+        window.onload = loadData;
+    </script>
+</body>
+</html>
